@@ -40,8 +40,12 @@ def analyze_strategy_after_n_days(
     avg_signals_per_year = float(total_signals / span_years)
 
     trades: list[dict[str, Any]] = []
+    next_entry_allowed_idx = 0
 
     for i in range(len(df)):
+        if i < next_entry_allowed_idx:
+            continue
+
         if not bool(df.iloc[i]["entry_signal"]):
             continue
 
@@ -136,6 +140,9 @@ def analyze_strategy_after_n_days(
                 "pnl_usd": pnl_usd,
             }
         )
+
+        # Prevent duplicate overlapping trades from consecutive entry signals.
+        next_entry_allowed_idx = exit_idx + 1
 
     trades_df = pd.DataFrame(trades)
     if trades_df.empty:
