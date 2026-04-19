@@ -1,0 +1,11 @@
+yfinance
+pandas
+numpy
+pandas-ta
+plotly
+dash
+requests
+schedule
+python-dotenv
+scipy
+statsmodels
