@@ -10,6 +10,7 @@ class RuntimeConfig:
     backtest_symbol: str
     backtest_symbols: list[str]
     period: str
+    interval: str
     horizon_days: int
     ma200_filter_mode: str
     trade_capital_usd: float
@@ -45,6 +46,14 @@ def parse_symbols_list(value: str | None) -> list[str]:
     if not value:
         return []
     return [s.strip().upper() for s in value.split(",") if s.strip()]
+
+
+def parse_backtest_interval(value: str | None) -> str:
+    interval = (value or "1d").strip().lower()
+    allowed = {"1m", "2m", "5m", "15m", "30m", "60m", "90m", "1h", "1d", "5d", "1wk", "1mo", "3mo"}
+    if interval not in allowed:
+        return "1d"
+    return interval
 
 
 def choose_strategy() -> str:
@@ -102,6 +111,7 @@ def load_runtime_config(ask_strategy: bool = True) -> RuntimeConfig:
         backtest_symbol=os.getenv("BACKTEST_SYMBOL", "AAPL"),
         backtest_symbols=parse_symbols_list(os.getenv("BACKTEST_SYMBOLS", "")),
         period=os.getenv("BACKTEST_PERIOD", "10y"),
+        interval=parse_backtest_interval(os.getenv("BACKTEST_INTERVAL", "1d")),
         horizon_days=int(os.getenv("ROI_HORIZON_DAYS", "20")),
         ma200_filter_mode=parse_ma200_filter(os.getenv("MA200_FILTER", "2")),
         trade_capital_usd=float(os.getenv("TRADE_CAPITAL_USD", "1000")),

@@ -11,13 +11,14 @@ from pyfinviz.strategies import STRATEGIES
 def analyze_strategy_after_n_days(
     symbol: str,
     period: str,
+    interval: str,
     horizon_days: int,
     ma200_filter_mode: str,
     trade_capital_usd: float,
     strategy_key: str,
     strategy_params: dict[str, float],
 ) -> tuple[pd.DataFrame, dict[str, float]]:
-    df = get_yfinance_history(symbol=symbol, period=period, interval="1d")
+    df = get_yfinance_history(symbol=symbol, period=period, interval=interval)
     if df.empty:
         return pd.DataFrame(), {}
 
@@ -181,6 +182,7 @@ def analyze_strategy_after_n_days(
 def _batch_row(
     symbol: str,
     period: str,
+    interval: str,
     horizon_days: int,
     ma200_filter_mode: str,
     trade_capital_usd: float,
@@ -190,6 +192,7 @@ def _batch_row(
     _, stats = analyze_strategy_after_n_days(
         symbol=symbol,
         period=period,
+        interval=interval,
         horizon_days=horizon_days,
         ma200_filter_mode=ma200_filter_mode,
         trade_capital_usd=trade_capital_usd,
@@ -226,6 +229,7 @@ def _batch_row(
 def analyze_symbols_batch(
     symbols: list[str],
     period: str,
+    interval: str,
     horizon_days: int,
     ma200_filter_mode: str,
     trade_capital_usd: float,
@@ -245,6 +249,7 @@ def analyze_symbols_batch(
                 _batch_row,
                 symbol,
                 period,
+                interval,
                 horizon_days,
                 ma200_filter_mode,
                 trade_capital_usd,
@@ -282,10 +287,11 @@ def analyze_symbols_batch(
 def _scan_symbol_entries(
     symbol: str,
     period: str,
+    interval: str,
     ma200_filter_mode: str,
     strategy_params: dict[str, float],
 ) -> list[dict[str, Any]]:
-    df = get_yfinance_history(symbol=symbol, period=period, interval="1d")
+    df = get_yfinance_history(symbol=symbol, period=period, interval=interval)
     if df.empty:
         return []
 
@@ -319,6 +325,7 @@ def _scan_symbol_entries(
 def scan_entry_opportunities(
     symbols: list[str],
     period: str,
+    interval: str,
     ma200_filter_mode: str,
     strategy_params: dict[str, float],
     batch_workers: int,
@@ -335,6 +342,7 @@ def scan_entry_opportunities(
                 _scan_symbol_entries,
                 symbol,
                 period,
+                interval,
                 ma200_filter_mode,
                 strategy_params,
             ): symbol

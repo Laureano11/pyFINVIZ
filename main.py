@@ -31,12 +31,13 @@ def run_strategy_analysis() -> None:
 	if cfg.backtest_symbols:
 		print(
 			f"\n--- Estrategia: {strategy.name} | Lote ({len(cfg.backtest_symbols)} tickers) | "
-			f"Filtro MA200: {cfg.ma200_filter_mode} | ROI a {cfg.horizon_days} ruedas | "
+			f"Filtro MA200: {cfg.ma200_filter_mode} | Temporalidad: {cfg.interval} | ROI a {cfg.horizon_days} ruedas | "
 			f"Capital por trade: ${cfg.trade_capital_usd:.2f} | Workers: {cfg.batch_workers} ---"
 		)
 		summary_df = analyze_symbols_batch(
 			symbols=cfg.backtest_symbols,
 			period=cfg.period,
+			interval=cfg.interval,
 			horizon_days=cfg.horizon_days,
 			ma200_filter_mode=cfg.ma200_filter_mode,
 			trade_capital_usd=cfg.trade_capital_usd,
@@ -64,12 +65,13 @@ def run_strategy_analysis() -> None:
 	else:
 		print(
 			f"\n--- Estrategia: {strategy.name} en {cfg.backtest_symbol} | "
-			f"Filtro MA200: {cfg.ma200_filter_mode} | ROI a {cfg.horizon_days} ruedas | "
+			f"Filtro MA200: {cfg.ma200_filter_mode} | Temporalidad: {cfg.interval} | ROI a {cfg.horizon_days} ruedas | "
 			f"Capital por trade: ${cfg.trade_capital_usd:.2f} ---"
 		)
 		trades_df, stats = analyze_strategy_after_n_days(
 			symbol=cfg.backtest_symbol,
 			period=cfg.period,
+			interval=cfg.interval,
 			horizon_days=cfg.horizon_days,
 			ma200_filter_mode=cfg.ma200_filter_mode,
 			trade_capital_usd=cfg.trade_capital_usd,
@@ -155,12 +157,13 @@ def run_entry_scanner() -> None:
 
 	print(
 		f"\n--- Busqueda de entrys | {len(symbols)} tickers | "
-		f"Filtro MA200: {cfg.ma200_filter_mode} | Estrategias: 1-9 | Workers: {cfg.batch_workers} ---"
+		f"Filtro MA200: {cfg.ma200_filter_mode} | Temporalidad: {cfg.interval} | Estrategias: 1-9 | Workers: {cfg.batch_workers} ---"
 	)
 
 	opportunities_df = scan_entry_opportunities(
 		symbols=symbols,
 		period=cfg.period,
+		interval=cfg.interval,
 		ma200_filter_mode=cfg.ma200_filter_mode,
 		strategy_params=cfg.strategy_params,
 		batch_workers=cfg.batch_workers,
