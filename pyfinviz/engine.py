@@ -1,5 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from typing import Any
+from typing import Any, Optional
 
 import pandas as pd
 
@@ -61,7 +61,7 @@ def analyze_strategy_after_n_days(
         exit_idx = horizon_exit_idx
         exit_price = float(df.iloc[exit_idx]["Close"])
         exit_reason = "horizon"
-        signal_exit_idx: int | None = None
+        signal_exit_idx: Optional[int] = None
 
         stop_atr = strategy.stop_atr
         take_atr = strategy.take_atr
@@ -304,7 +304,7 @@ def _scan_symbol_entries(
     for key, strategy in STRATEGIES.items():
         signal = strategy.entry_fn(df, ma200_filter_mode, strategy_params).fillna(False)
         if bool(signal.iloc[-1]):
-            tp_price: float | None = None
+            tp_price: Optional[float] = None
             if strategy.take_atr > 0 and pd.notna(atr14_last):
                 tp_price = close_price + (strategy.take_atr * float(atr14_last))
 

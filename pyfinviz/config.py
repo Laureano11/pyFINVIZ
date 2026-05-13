@@ -1,5 +1,6 @@
 import os
 from dataclasses import dataclass
+from typing import Optional
 
 from pyfinviz.strategies import STRATEGIES
 
@@ -21,13 +22,13 @@ class RuntimeConfig:
     enable_fmp: bool
 
 
-def parse_bool_env(value: str | None, default: bool = False) -> bool:
+def parse_bool_env(value: Optional[str], default: bool = False) -> bool:
     if value is None:
         return default
     return value.strip().lower() in {"1", "true", "yes", "on"}
 
 
-def parse_ma200_filter(value: str | None) -> str:
+def parse_ma200_filter(value: Optional[str]) -> str:
     mode = (value or "2").strip().upper()
     if mode == "0":
         return "NONE"
@@ -42,13 +43,13 @@ def parse_ma200_filter(value: str | None) -> str:
     return mode
 
 
-def parse_symbols_list(value: str | None) -> list[str]:
+def parse_symbols_list(value: Optional[str]) -> list[str]:
     if not value:
         return []
     return [s.strip().upper() for s in value.split(",") if s.strip()]
 
 
-def parse_backtest_interval(value: str | None) -> str:
+def parse_backtest_interval(value: Optional[str]) -> str:
     interval = (value or "1d").strip().lower()
     allowed = {"1m", "2m", "5m", "15m", "30m", "60m", "90m", "1h", "1d", "5d", "1wk", "1mo", "3mo"}
     if interval not in allowed:
