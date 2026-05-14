@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Callable
+from typing import Callable, Optional
 
 import pandas as pd
 
@@ -13,7 +13,7 @@ class StrategyDefinition:
     name: str
     description: str
     entry_fn: EntryFn
-    exit_fn: ExitFn | None = None
+    exit_fn: Optional[ExitFn] = None
     execution: str = "next_open"
     stop_atr: float = 0.0
     take_atr: float = 0.0
