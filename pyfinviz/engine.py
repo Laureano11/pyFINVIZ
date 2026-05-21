@@ -3,22 +3,66 @@ from typing import Any, Optional
 
 import pandas as pd
 
-from pyfinviz.data_sources import get_yfinance_history
+from pyfinviz.data_sources import get_market_history
 from pyfinviz.indicators import compute_indicators
 from pyfinviz.strategies import STRATEGIES
+
+
+def _load_history(
+    symbol: str,
+    period: str,
+    interval: str,
+    market_data_source: str,
+    market_data_fallback_to_yfinance: bool,
+    ibkr_host: str,
+    ibkr_port: int,
+    ibkr_client_id: int,
+    ibkr_use_rth: bool,
+    ibkr_what_to_show: str,
+) -> pd.DataFrame:
+    return get_market_history(
+        symbol=symbol,
+        period=period,
+        interval=interval,
+        source=market_data_source,
+        fallback_to_yfinance=market_data_fallback_to_yfinance,
+        ibkr_host=ibkr_host,
+        ibkr_port=ibkr_port,
+        ibkr_client_id=ibkr_client_id,
+        ibkr_use_rth=ibkr_use_rth,
+        ibkr_what_to_show=ibkr_what_to_show,
+    )
 
 
 def analyze_strategy_after_n_days(
     symbol: str,
     period: str,
     interval: str,
+    market_data_source: str,
+    market_data_fallback_to_yfinance: bool,
+    ibkr_host: str,
+    ibkr_port: int,
+    ibkr_client_id: int,
+    ibkr_use_rth: bool,
+    ibkr_what_to_show: str,
     horizon_days: int,
     ma200_filter_mode: str,
     trade_capital_usd: float,
     strategy_key: str,
     strategy_params: dict[str, float],
 ) -> tuple[pd.DataFrame, dict[str, float]]:
-    df = get_yfinance_history(symbol=symbol, period=period, interval=interval)
+    df = _load_history(
+        symbol=symbol,
+        period=period,
+        interval=interval,
+        market_data_source=market_data_source,
+        market_data_fallback_to_yfinance=market_data_fallback_to_yfinance,
+        ibkr_host=ibkr_host,
+        ibkr_port=ibkr_port,
+        ibkr_client_id=ibkr_client_id,
+        ibkr_use_rth=ibkr_use_rth,
+        ibkr_what_to_show=ibkr_what_to_show,
+    )
     if df.empty:
         return pd.DataFrame(), {}
 
@@ -183,6 +227,13 @@ def _batch_row(
     symbol: str,
     period: str,
     interval: str,
+    market_data_source: str,
+    market_data_fallback_to_yfinance: bool,
+    ibkr_host: str,
+    ibkr_port: int,
+    ibkr_client_id: int,
+    ibkr_use_rth: bool,
+    ibkr_what_to_show: str,
     horizon_days: int,
     ma200_filter_mode: str,
     trade_capital_usd: float,
@@ -193,6 +244,13 @@ def _batch_row(
         symbol=symbol,
         period=period,
         interval=interval,
+        market_data_source=market_data_source,
+        market_data_fallback_to_yfinance=market_data_fallback_to_yfinance,
+        ibkr_host=ibkr_host,
+        ibkr_port=ibkr_port,
+        ibkr_client_id=ibkr_client_id,
+        ibkr_use_rth=ibkr_use_rth,
+        ibkr_what_to_show=ibkr_what_to_show,
         horizon_days=horizon_days,
         ma200_filter_mode=ma200_filter_mode,
         trade_capital_usd=trade_capital_usd,
@@ -230,6 +288,13 @@ def analyze_symbols_batch(
     symbols: list[str],
     period: str,
     interval: str,
+    market_data_source: str,
+    market_data_fallback_to_yfinance: bool,
+    ibkr_host: str,
+    ibkr_port: int,
+    ibkr_client_id: int,
+    ibkr_use_rth: bool,
+    ibkr_what_to_show: str,
     horizon_days: int,
     ma200_filter_mode: str,
     trade_capital_usd: float,
@@ -250,6 +315,13 @@ def analyze_symbols_batch(
                 symbol,
                 period,
                 interval,
+                market_data_source,
+                market_data_fallback_to_yfinance,
+                ibkr_host,
+                ibkr_port,
+                ibkr_client_id,
+                ibkr_use_rth,
+                ibkr_what_to_show,
                 horizon_days,
                 ma200_filter_mode,
                 trade_capital_usd,
@@ -288,10 +360,28 @@ def _scan_symbol_entries(
     symbol: str,
     period: str,
     interval: str,
+    market_data_source: str,
+    market_data_fallback_to_yfinance: bool,
+    ibkr_host: str,
+    ibkr_port: int,
+    ibkr_client_id: int,
+    ibkr_use_rth: bool,
+    ibkr_what_to_show: str,
     ma200_filter_mode: str,
     strategy_params: dict[str, float],
 ) -> list[dict[str, Any]]:
-    df = get_yfinance_history(symbol=symbol, period=period, interval=interval)
+    df = _load_history(
+        symbol=symbol,
+        period=period,
+        interval=interval,
+        market_data_source=market_data_source,
+        market_data_fallback_to_yfinance=market_data_fallback_to_yfinance,
+        ibkr_host=ibkr_host,
+        ibkr_port=ibkr_port,
+        ibkr_client_id=ibkr_client_id,
+        ibkr_use_rth=ibkr_use_rth,
+        ibkr_what_to_show=ibkr_what_to_show,
+    )
     if df.empty:
         return []
 
@@ -326,6 +416,13 @@ def scan_entry_opportunities(
     symbols: list[str],
     period: str,
     interval: str,
+    market_data_source: str,
+    market_data_fallback_to_yfinance: bool,
+    ibkr_host: str,
+    ibkr_port: int,
+    ibkr_client_id: int,
+    ibkr_use_rth: bool,
+    ibkr_what_to_show: str,
     ma200_filter_mode: str,
     strategy_params: dict[str, float],
     batch_workers: int,
@@ -343,6 +440,13 @@ def scan_entry_opportunities(
                 symbol,
                 period,
                 interval,
+                market_data_source,
+                market_data_fallback_to_yfinance,
+                ibkr_host,
+                ibkr_port,
+                ibkr_client_id,
+                ibkr_use_rth,
+                ibkr_what_to_show,
                 ma200_filter_mode,
                 strategy_params,
             ): symbol

@@ -23,12 +23,13 @@ El proyecto descarga historicos de mercado, calcula indicadores tecnicos y evalu
 
 ## Que hace
 
-- Descarga precios historicos con yfinance.
+- Descarga precios historicos con yfinance o IBKR.
 - Calcula indicadores como EMA, MA, MACD, RSI, RSI(2), Williams %R, MFI, Stoch RSI, ATR, ADX e IBS.
 - Ejecuta 9 estrategias tecnicas predefinidas.
 - Permite analizar una sola accion o una lista de tickers en lote.
 - Escanea oportunidades de entrada actuales en base a las estrategias definidas.
 - Muestra resumen de trades, ROI, PnL y cantidad de señales.
+- Puede usar IBKR como fuente de datos historicos y caer a yfinance si IBKR no responde.
 
 ## Requisitos
 
@@ -80,6 +81,13 @@ El proyecto lee variables desde un archivo .env. Las mas utiles son:
 - SYMBOL: simbolo usado para la consulta opcional a FMP.
 - BACKTEST_SYMBOL: ticker unico para backtesting cuando no se usa una lista.
 - BACKTEST_SYMBOLS: lista de tickers separada por comas para analisis en lote.
+- MARKET_DATA_SOURCE: yfinance o ibkr.
+- MARKET_DATA_FALLBACK_TO_YFINANCE: 1 para usar yfinance si IBKR falla.
+- IBKR_HOST: host de TWS o IB Gateway.
+- IBKR_PORT: puerto de TWS o IB Gateway.
+- IBKR_CLIENT_ID: client id para la conexion.
+- IBKR_USE_RTH: 1 para usar solo horario regular, 0 para incluir extended hours.
+- IBKR_WHAT_TO_SHOW: TRADES por defecto.
 - BACKTEST_PERIOD: periodo historico a descargar, por ejemplo 10y.
 - BACKTEST_INTERVAL: intervalo de velas, por ejemplo 1d.
 - ROI_HORIZON_DAYS: cantidad de velas a futuro para medir el resultado.
@@ -120,6 +128,13 @@ STRATEGY_CHOICE=1
 BATCH_WORKERS=8
 ENABLE_FMP=0
 FMP_API_KEY=tu_api_key
+MARKET_DATA_SOURCE=ibkr
+MARKET_DATA_FALLBACK_TO_YFINANCE=1
+IBKR_HOST=127.0.0.1
+IBKR_PORT=7497
+IBKR_CLIENT_ID=1
+IBKR_USE_RTH=1
+IBKR_WHAT_TO_SHOW=TRADES
 ```
 
 ## Flujo de ejecucion recomendado
@@ -147,4 +162,6 @@ FMP_API_KEY=tu_api_key
 
 - El proyecto esta pensado para correr desde consola, no como web app.
 - Si ENABLE_FMP=0, el programa sigue funcionando solo con yfinance.
+- Si usas IBKR, necesitas TWS o IB Gateway abiertos y logueados.
+- Para IBKR, conviene empezar con una cuenta paper y el socket API habilitado.
 - Para backtests mas rapidos en lote, sube o baja BATCH_WORKERS segun tu maquina.

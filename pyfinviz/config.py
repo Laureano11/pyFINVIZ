@@ -10,6 +10,13 @@ class RuntimeConfig:
     symbol: str
     backtest_symbol: str
     backtest_symbols: list[str]
+    market_data_source: str
+    market_data_fallback_to_yfinance: bool
+    ibkr_host: str
+    ibkr_port: int
+    ibkr_client_id: int
+    ibkr_use_rth: bool
+    ibkr_what_to_show: str
     period: str
     interval: str
     horizon_days: int
@@ -107,10 +114,24 @@ def load_runtime_config(ask_strategy: bool = True) -> RuntimeConfig:
         "stochrsi_k_max": float(os.getenv("STOCHRSI_K_MAX", "30")),
     }
 
+    market_data_source = os.getenv("MARKET_DATA_SOURCE", "yfinance").strip().lower()
+    if market_data_source not in {"yfinance", "ibkr"}:
+        market_data_source = "yfinance"
+
     return RuntimeConfig(
         symbol=os.getenv("SYMBOL", "AAPL"),
         backtest_symbol=os.getenv("BACKTEST_SYMBOL", "AAPL"),
         backtest_symbols=parse_symbols_list(os.getenv("BACKTEST_SYMBOLS", "")),
+        market_data_source=market_data_source,
+        market_data_fallback_to_yfinance=parse_bool_env(
+            os.getenv("MARKET_DATA_FALLBACK_TO_YFINANCE", "1"),
+            default=True,
+        ),
+        ibkr_host=os.getenv("IBKR_HOST", "127.0.0.1"),
+        ibkr_port=int(os.getenv("IBKR_PORT", "7497")),
+        ibkr_client_id=int(os.getenv("IBKR_CLIENT_ID", "1")),
+        ibkr_use_rth=parse_bool_env(os.getenv("IBKR_USE_RTH", "1"), default=True),
+        ibkr_what_to_show=os.getenv("IBKR_WHAT_TO_SHOW", "TRADES").strip().upper(),
         period=os.getenv("BACKTEST_PERIOD", "10y"),
         interval=parse_backtest_interval(os.getenv("BACKTEST_INTERVAL", "1d")),
         horizon_days=int(os.getenv("ROI_HORIZON_DAYS", "20")),
