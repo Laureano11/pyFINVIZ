@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from pyfinviz.strategies import STRATEGIES
+from pyfinviz.sp500_list import SP500_TICKERS
 
 
 @dataclass
@@ -47,6 +48,7 @@ def parse_symbols_list(value: Optional[str]) -> list[str]:
     if not value:
         return []
     return [s.strip().upper() for s in value.split(",") if s.strip()]
+
 
 
 def parse_backtest_interval(value: Optional[str]) -> str:
@@ -95,22 +97,18 @@ def load_runtime_config(ask_strategy: bool = True) -> RuntimeConfig:
     strategy_params = {
         "rsi_max": float(os.getenv("MACD_RSI_MAX", "40")),
         "rsi_min_sell": float(os.getenv("MACD_RSI_SELL_MIN", "60")),
-        "mfi_max": float(os.getenv("MFI_MAX", "40")),
-        "mfi_min_sell": float(os.getenv("MFI_SELL_MIN", "60")),
-        "rsi2_buy_level": float(os.getenv("RSI2_BUY_LEVEL", "10")),
-        "rsi2_sell_level": float(os.getenv("RSI2_SELL_LEVEL", "60")),
         "willr_buy_level": float(os.getenv("WILLR_BUY_LEVEL", "-80")),
         "willr_sell_level": float(os.getenv("WILLR_SELL_LEVEL", "-20")),
-        "ibs_buy_level": float(os.getenv("IBS_BUY_LEVEL", "0.20")),
-        "ibs_sell_level": float(os.getenv("IBS_SELL_LEVEL", "0.80")),
         "adx_ema_min_adx": float(os.getenv("ADX_EMA_MIN_ADX", "15")),
-        "stochrsi_k_max": float(os.getenv("STOCHRSI_K_MAX", "30")),
     }
+
+    env_symbols = parse_symbols_list(os.getenv("BACKTEST_SYMBOLS", ""))
+    backtest_symbols = env_symbols if env_symbols else list(SP500_TICKERS)
 
     return RuntimeConfig(
         symbol=os.getenv("SYMBOL", "AAPL"),
         backtest_symbol=os.getenv("BACKTEST_SYMBOL", "AAPL"),
-        backtest_symbols=parse_symbols_list(os.getenv("BACKTEST_SYMBOLS", "")),
+        backtest_symbols=backtest_symbols,
         period=os.getenv("BACKTEST_PERIOD", "10y"),
         interval=parse_backtest_interval(os.getenv("BACKTEST_INTERVAL", "1d")),
         horizon_days=int(os.getenv("ROI_HORIZON_DAYS", "20")),

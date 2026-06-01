@@ -28,28 +28,11 @@ def compute_indicators(df: pd.DataFrame) -> pd.DataFrame:
     df["MACD_SIGNAL"] = df["MACD"].ewm(span=9, adjust=False).mean()
 
     df["RSI"] = compute_rsi(df["Close"], 14)
-    df["RSI2"] = compute_rsi(df["Close"], 2)
 
     highest_high_14 = df["High"].rolling(14).max()
     lowest_low_14 = df["Low"].rolling(14).min()
     range_14 = (highest_high_14 - lowest_low_14).replace(0, pd.NA)
     df["WILLR"] = -100 * ((highest_high_14 - df["Close"]) / range_14)
-
-    typical_price = (df["High"] + df["Low"] + df["Close"]) / 3
-    raw_money_flow = typical_price * df["Volume"]
-    positive_flow = raw_money_flow.where(typical_price > typical_price.shift(1), 0.0)
-    negative_flow = raw_money_flow.where(typical_price < typical_price.shift(1), 0.0)
-    positive_mf_14 = positive_flow.rolling(14).sum()
-    negative_mf_14 = negative_flow.rolling(14).sum().replace(0, pd.NA)
-    money_flow_ratio = positive_mf_14 / negative_mf_14
-    df["MFI14"] = 100 - (100 / (1 + money_flow_ratio))
-
-    rsi_min_14 = df["RSI"].rolling(14).min()
-    rsi_max_14 = df["RSI"].rolling(14).max()
-    rsi_range_14 = (rsi_max_14 - rsi_min_14).replace(0, pd.NA)
-    stoch_rsi = (df["RSI"] - rsi_min_14) / rsi_range_14
-    df["STOCH_RSI_K"] = stoch_rsi.rolling(3).mean() * 100
-    df["STOCH_RSI_D"] = df["STOCH_RSI_K"].rolling(3).mean()
 
     prev_close = df["Close"].shift(1)
     tr_components = pd.concat(
@@ -75,8 +58,5 @@ def compute_indicators(df: pd.DataFrame) -> pd.DataFrame:
     di_sum = (df["PLUS_DI14"] + df["MINUS_DI14"]).replace(0, pd.NA)
     dx = 100 * ((df["PLUS_DI14"] - df["MINUS_DI14"]).abs() / di_sum)
     df["ADX14"] = dx.ewm(alpha=1 / 14, adjust=False, min_periods=14).mean()
-
-    daily_range = (df["High"] - df["Low"]).replace(0, pd.NA)
-    df["IBS"] = (df["Close"] - df["Low"]) / daily_range
 
     return df

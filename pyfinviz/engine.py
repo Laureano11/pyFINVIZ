@@ -3,7 +3,7 @@ from typing import Any, Optional
 
 import pandas as pd
 
-from pyfinviz.data_sources import get_yfinance_history
+from pyfinviz.data_sources import get_yfinance_history, get_yfinance_history_batch
 from pyfinviz.indicators import compute_indicators
 from pyfinviz.strategies import STRATEGIES
 
@@ -19,7 +19,25 @@ def analyze_strategy_after_n_days(
     strategy_params: dict[str, float],
 ) -> tuple[pd.DataFrame, dict[str, float]]:
     df = get_yfinance_history(symbol=symbol, period=period, interval=interval)
-    if df.empty:
+    return _backtest_from_df(
+        df,
+        horizon_days,
+        ma200_filter_mode,
+        trade_capital_usd,
+        strategy_key,
+        strategy_params,
+    )
+
+
+def _backtest_from_df(
+    df: pd.DataFrame,
+    horizon_days: int,
+    ma200_filter_mode: str,
+    trade_capital_usd: float,
+    strategy_key: str,
+    strategy_params: dict[str, float],
+) -> tuple[pd.DataFrame, dict[str, float]]:
+    if df is None or df.empty:
         return pd.DataFrame(), {}
 
     df = compute_indicators(df)
@@ -181,23 +199,20 @@ def analyze_strategy_after_n_days(
 
 def _batch_row(
     symbol: str,
-    period: str,
-    interval: str,
+    df: pd.DataFrame,
     horizon_days: int,
     ma200_filter_mode: str,
     trade_capital_usd: float,
     strategy_key: str,
     strategy_params: dict[str, float],
 ) -> dict[str, Any]:
-    _, stats = analyze_strategy_after_n_days(
-        symbol=symbol,
-        period=period,
-        interval=interval,
-        horizon_days=horizon_days,
-        ma200_filter_mode=ma200_filter_mode,
-        trade_capital_usd=trade_capital_usd,
-        strategy_key=strategy_key,
-        strategy_params=strategy_params,
+    _, stats = _backtest_from_df(
+        df,
+        horizon_days,
+        ma200_filter_mode,
+        trade_capital_usd,
+        strategy_key,
+        strategy_params,
     )
 
     if not stats:
@@ -240,6 +255,13 @@ def analyze_symbols_batch(
     if not symbols:
         return pd.DataFrame()
 
+    histories = get_yfinance_history_batch(
+        symbols,
+        period=period,
+        interval=interval,
+        max_workers=batch_workers,
+    )
+
     workers = max(1, min(batch_workers, len(symbols)))
     rows: list[dict[str, Any]] = []
 
@@ -248,8 +270,7 @@ def analyze_symbols_batch(
             executor.submit(
                 _batch_row,
                 symbol,
-                period,
-                interval,
+                histories.get(symbol, pd.DataFrame()),
                 horizon_days,
                 ma200_filter_mode,
                 trade_capital_usd,
@@ -286,13 +307,11 @@ def analyze_symbols_batch(
 
 def _scan_symbol_entries(
     symbol: str,
-    period: str,
-    interval: str,
+    df: pd.DataFrame,
     ma200_filter_mode: str,
     strategy_params: dict[str, float],
 ) -> list[dict[str, Any]]:
-    df = get_yfinance_history(symbol=symbol, period=period, interval=interval)
-    if df.empty:
+    if df is None or df.empty:
         return []
 
     df = compute_indicators(df)
@@ -333,7 +352,16 @@ def scan_entry_opportunities(
     if not symbols:
         return pd.DataFrame()
 
-    workers = max(1, min(batch_workers, len(symbols)))
+    histories = get_yfinance_history_batch(
+        symbols,
+        period=period,
+        interval=interval,
+        max_workers=batch_workers,
+    )
+    if not histories:
+        return pd.DataFrame()
+
+    workers = max(1, min(batch_workers, len(histories)))
     rows: list[dict[str, Any]] = []
 
     with ThreadPoolExecutor(max_workers=workers) as executor:
@@ -341,12 +369,11 @@ def scan_entry_opportunities(
             executor.submit(
                 _scan_symbol_entries,
                 symbol,
-                period,
-                interval,
+                df,
                 ma200_filter_mode,
                 strategy_params,
             ): symbol
-            for symbol in symbols
+            for symbol, df in histories.items()
         }
 
         for future in as_completed(futures):

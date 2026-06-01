@@ -157,7 +157,7 @@ def run_entry_scanner() -> None:
 
 	print(
 		f"\n--- Busqueda de entrys | {len(symbols)} tickers | "
-		f"Filtro MA200: {cfg.ma200_filter_mode} | Temporalidad: {cfg.interval} | Estrategias: 1-9 | Workers: {cfg.batch_workers} ---"
+		f"Filtro MA200: {cfg.ma200_filter_mode} | Temporalidad: {cfg.interval} | Estrategias: 1,2,3,8,9 | Workers: {cfg.batch_workers} ---"
 	)
 
 	opportunities_df = scan_entry_opportunities(

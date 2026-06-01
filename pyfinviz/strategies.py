@@ -56,55 +56,6 @@ def strategy_williams_r_exit(df: pd.DataFrame, params: dict[str, float]) -> pd.S
     return (df["WILLR"] > sell_level) & (df["WILLR"].shift(1) <= sell_level)
 
 
-def strategy_ibs(df: pd.DataFrame, ma200_filter_mode: str, params: dict[str, float]) -> pd.Series:
-    buy_level = params.get("ibs_buy_level", 0.20)
-    entry = df["IBS"] < buy_level
-    return apply_ma200_filter(entry, df, ma200_filter_mode)
-
-
-def strategy_ibs_exit(df: pd.DataFrame, params: dict[str, float]) -> pd.Series:
-    sell_level = params.get("ibs_sell_level", 0.80)
-    return df["IBS"] > sell_level
-
-
-def strategy_ibs_rsi2(df: pd.DataFrame, _: str, params: dict[str, float]) -> pd.Series:
-    ibs_level = params.get("ibs_buy_level", 0.20)
-    rsi2_level = params.get("rsi2_buy_level", 10.0)
-    return (df["Close"] > df["MA200"]) & (df["RSI2"] < rsi2_level) & (df["IBS"] < ibs_level)
-
-
-def strategy_ibs_rsi2_exit(df: pd.DataFrame, params: dict[str, float]) -> pd.Series:
-    rsi2_sell = params.get("rsi2_sell_level", 60.0)
-    ibs_sell = params.get("ibs_sell_level", 0.80)
-    return (df["RSI2"] > rsi2_sell) | (df["IBS"] > ibs_sell)
-
-
-def strategy_macd_rsi_mfi(df: pd.DataFrame, ma200_filter_mode: str, params: dict[str, float]) -> pd.Series:
-    rsi_max = params.get("rsi_max", 40.0)
-    mfi_max = params.get("mfi_max", 40.0)
-    macd_cross_up = (df["MACD"] > df["MACD_SIGNAL"]) & (df["MACD"].shift(1) <= df["MACD_SIGNAL"].shift(1))
-    entry = macd_cross_up & (df["RSI"] < rsi_max) & (df["MFI14"] < mfi_max)
-    return apply_ma200_filter(entry, df, ma200_filter_mode)
-
-
-def strategy_macd_rsi_mfi_exit(df: pd.DataFrame, params: dict[str, float]) -> pd.Series:
-    rsi_min_sell = params.get("rsi_min_sell", 60.0)
-    mfi_min_sell = params.get("mfi_min_sell", 60.0)
-    macd_cross_down = (df["MACD"] < df["MACD_SIGNAL"]) & (df["MACD"].shift(1) >= df["MACD_SIGNAL"].shift(1))
-    return macd_cross_down & (df["RSI"] > rsi_min_sell) & (df["MFI14"] > mfi_min_sell)
-
-
-def strategy_stochrsi_macd(df: pd.DataFrame, ma200_filter_mode: str, params: dict[str, float]) -> pd.Series:
-    # Essential version: keep only momentum direction + stoch oversold zone.
-    stoch_k_max = params.get("stochrsi_k_max", 30.0)
-    entry = (df["STOCH_RSI_K"] < stoch_k_max) & (df["MACD"] > df["MACD_SIGNAL"])
-    return apply_ma200_filter(entry, df, ma200_filter_mode)
-
-
-def strategy_stochrsi_macd_exit(df: pd.DataFrame, _: dict[str, float]) -> pd.Series:
-    return df["MACD"] < df["MACD_SIGNAL"]
-
-
 def strategy_ema50_200_adx_rsi(df: pd.DataFrame, ma200_filter_mode: str, _: dict[str, float]) -> pd.Series:
     golden_cross = (df["EMA50"] > df["EMA200"]) & (df["EMA50"].shift(1) <= df["EMA200"].shift(1))
     trend_filter = df["ADX14"] > 20
@@ -118,14 +69,12 @@ def strategy_ema50_200_adx_rsi_exit(df: pd.DataFrame, _: dict[str, float]) -> pd
 
 
 def strategy_adx_ema_direction(df: pd.DataFrame, ma200_filter_mode: str, params: dict[str, float]) -> pd.Series:
-    # Keep only core constraints: trend strength + price above EMA14.
     adx_min = params.get("adx_ema_min_adx", 15.0)
     entry = (df["ADX14"] > adx_min) & (df["Close"] > df["EMA14"])
     return apply_ma200_filter(entry, df, ma200_filter_mode)
 
 
 def strategy_adx_ema_direction_exit(df: pd.DataFrame, _: dict[str, float]) -> pd.Series:
-    # Exit on loss of direction only.
     return df["Close"] < df["EMA14"]
 
 
@@ -146,32 +95,6 @@ STRATEGIES: dict[str, StrategyDefinition] = {
         description="Compra: cae bajo -80 | Venta: sube sobre -20",
         entry_fn=strategy_williams_r,
         exit_fn=strategy_williams_r_exit,
-    ),
-    "4": StrategyDefinition(
-        name="IBS",
-        description="Compra IBS < 0.20 | Venta IBS > 0.80",
-        entry_fn=strategy_ibs,
-        exit_fn=strategy_ibs_exit,
-        execution="close",
-    ),
-    "5": StrategyDefinition(
-        name="IBS + RSI(2)",
-        description="Compra: Close>MA200 + RSI2<10 + IBS<0.20 | Venta: RSI2>60 o IBS>0.80",
-        entry_fn=strategy_ibs_rsi2,
-        exit_fn=strategy_ibs_rsi2_exit,
-        execution="close",
-    ),
-    "6": StrategyDefinition(
-        name="MACD + RSI + MFI",
-        description="Compra: MACD alcista + RSI<40 + MFI<40 | Venta: MACD bajista + RSI>60 + MFI>60",
-        entry_fn=strategy_macd_rsi_mfi,
-        exit_fn=strategy_macd_rsi_mfi_exit,
-    ),
-    "7": StrategyDefinition(
-        name="Stoch RSI + MACD",
-        description="Compra: StochRSI K bajo + MACD sobre signal | Venta: MACD bajo signal",
-        entry_fn=strategy_stochrsi_macd,
-        exit_fn=strategy_stochrsi_macd_exit,
     ),
     "8": StrategyDefinition(
         name="EMA50/200 + ADX + RSI",
