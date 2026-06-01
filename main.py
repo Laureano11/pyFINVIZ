@@ -31,13 +31,20 @@ def run_strategy_analysis() -> None:
 	if cfg.backtest_symbols:
 		print(
 			f"\n--- Estrategia: {strategy.name} | Lote ({len(cfg.backtest_symbols)} tickers) | "
-			f"Filtro MA200: {cfg.ma200_filter_mode} | Temporalidad: {cfg.interval} | ROI a {cfg.horizon_days} ruedas | "
+			f"Fuente: {cfg.market_data_source} | Filtro MA200: {cfg.ma200_filter_mode} | Temporalidad: {cfg.interval} | ROI a {cfg.horizon_days} ruedas | "
 			f"Capital por trade: ${cfg.trade_capital_usd:.2f} | Workers: {cfg.batch_workers} ---"
 		)
 		summary_df = analyze_symbols_batch(
 			symbols=cfg.backtest_symbols,
 			period=cfg.period,
 			interval=cfg.interval,
+			market_data_source=cfg.market_data_source,
+			market_data_fallback_to_yfinance=cfg.market_data_fallback_to_yfinance,
+			ibkr_host=cfg.ibkr_host,
+			ibkr_port=cfg.ibkr_port,
+			ibkr_client_id=cfg.ibkr_client_id,
+			ibkr_use_rth=cfg.ibkr_use_rth,
+			ibkr_what_to_show=cfg.ibkr_what_to_show,
 			horizon_days=cfg.horizon_days,
 			ma200_filter_mode=cfg.ma200_filter_mode,
 			trade_capital_usd=cfg.trade_capital_usd,
@@ -65,13 +72,20 @@ def run_strategy_analysis() -> None:
 	else:
 		print(
 			f"\n--- Estrategia: {strategy.name} en {cfg.backtest_symbol} | "
-			f"Filtro MA200: {cfg.ma200_filter_mode} | Temporalidad: {cfg.interval} | ROI a {cfg.horizon_days} ruedas | "
+			f"Fuente: {cfg.market_data_source} | Filtro MA200: {cfg.ma200_filter_mode} | Temporalidad: {cfg.interval} | ROI a {cfg.horizon_days} ruedas | "
 			f"Capital por trade: ${cfg.trade_capital_usd:.2f} ---"
 		)
 		trades_df, stats = analyze_strategy_after_n_days(
 			symbol=cfg.backtest_symbol,
 			period=cfg.period,
 			interval=cfg.interval,
+			market_data_source=cfg.market_data_source,
+			market_data_fallback_to_yfinance=cfg.market_data_fallback_to_yfinance,
+			ibkr_host=cfg.ibkr_host,
+			ibkr_port=cfg.ibkr_port,
+			ibkr_client_id=cfg.ibkr_client_id,
+			ibkr_use_rth=cfg.ibkr_use_rth,
+			ibkr_what_to_show=cfg.ibkr_what_to_show,
 			horizon_days=cfg.horizon_days,
 			ma200_filter_mode=cfg.ma200_filter_mode,
 			trade_capital_usd=cfg.trade_capital_usd,
@@ -164,6 +178,13 @@ def run_entry_scanner() -> None:
 		symbols=symbols,
 		period=cfg.period,
 		interval=cfg.interval,
+		market_data_source=cfg.market_data_source,
+		market_data_fallback_to_yfinance=cfg.market_data_fallback_to_yfinance,
+		ibkr_host=cfg.ibkr_host,
+		ibkr_port=cfg.ibkr_port,
+		ibkr_client_id=cfg.ibkr_client_id,
+		ibkr_use_rth=cfg.ibkr_use_rth,
+		ibkr_what_to_show=cfg.ibkr_what_to_show,
 		ma200_filter_mode=cfg.ma200_filter_mode,
 		strategy_params=cfg.strategy_params,
 		batch_workers=cfg.batch_workers,
@@ -215,4 +236,3 @@ def main() -> None:
 
 if __name__ == "__main__":
 	main()
-

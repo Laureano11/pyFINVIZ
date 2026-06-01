@@ -11,6 +11,13 @@ class RuntimeConfig:
     symbol: str
     backtest_symbol: str
     backtest_symbols: list[str]
+    market_data_source: str
+    market_data_fallback_to_yfinance: bool
+    ibkr_host: str
+    ibkr_port: int
+    ibkr_client_id: int
+    ibkr_use_rth: bool
+    ibkr_what_to_show: str
     period: str
     interval: str
     horizon_days: int

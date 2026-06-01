@@ -6,6 +6,7 @@ plotly
 dash
 requests
 schedule
+ib_insync
 python-dotenv
 scipy
 statsmodels
