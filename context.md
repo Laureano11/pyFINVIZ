@@ -125,3 +125,25 @@ Todas las estrategias soportan filtro MA200 configurable (`ABOVE`, `BELOW`, `NON
 - `pandas` — manipulación de datos y DataFrames
 - `python-dotenv` — carga de `.env`
 - `requests` — llamadas HTTP a FMP
+
+---
+
+## Componente 2: `backtester/` — backtester de portafolios (plan.md)
+
+Proyecto independiente del scanner `pyfinviz/`. Implementa las 5 estrategias del
+paper "151 Trading Strategies" (Kakushadze & Serur) con un motor de backtesting
+vectorizado común. Ver `plan.md` y `backtester/README.md`.
+
+- **Estrategias:** `dual_momentum` (§4.1.2), `trend_following` (§4.6),
+  `momentum_xs` (§3.1), `mean_reversion` (§3.9), `pairs` (§3.8, cointegración).
+- **Contrato:** cada estrategia produce un DataFrame de pesos objetivo; el motor
+  (`engine/backtest.py`) los shiftea 1 día (anti-look-ahead) y aplica costos.
+- **Datos:** `data/loader.py` con cache parquet. El cache se baja SIEMPRE en el
+  rango canónico amplio (2000-2030); `start`/`end` solo recortan al servir, para
+  que un backtest in-sample no corrompa el cache (bug corregido).
+- **CLI:** `python -m backtester.main {list|run|all|walkforward|sensitivity}`.
+- **Reportes:** tearsheets HTML por estrategia (quantstats) + comparativa +
+  matriz de correlaciones, en `backtester/reports/`.
+- **Tests:** `python -m pytest backtester/tests/` (31 tests: motor, anti-look-ahead,
+  contrato de pesos, recorte de cache).
+- **Deps extra:** `statsmodels`, `quantstats`, `matplotlib`, `pyarrow`, `pyyaml`.

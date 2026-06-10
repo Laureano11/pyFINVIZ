@@ -1,0 +1,52 @@
+# Parámetros de cada estrategia. Cambiar acá para análisis de sensibilidad.
+
+# Modelo de costos común (plan §5).
+costs:
+  commission_bps: 10        # por lado, sobre el turnover (|Δw|)
+  short_borrow_bps_annual: 35   # costo anual de shorting sobre exposición corta
+
+# §3.1 — Precio-momentum cross-sectional.
+momentum_xs:
+  lookback_months: 12       # ventana de momentum
+  skip_months: 1            # saltea el último mes (12-1)
+  rebalance: "M"            # mensual
+  quantile: 0.1             # decil superior/inferior
+  weighting: "uniform"      # "uniform" | "inverse_vol"
+  vol_lookback: 63          # ventana para inverse-vol (días)
+  long_short: true          # true = dólar-neutral L/S; false = long-only
+  min_names: 20             # mínimo de tickers válidos para operar el mes
+
+# §4.1.2 — Rotación sectorial doble momentum.
+dual_momentum:
+  lookback_months: 6        # retorno acumulado 6m (el paper sugiere 6-12)
+  rebalance: "M"
+  top_n: 3                  # comprar top 3 sectores
+  abs_ma_days: 200          # filtro SPY > MA(200)
+  # Si SPY <= MA200 → rotar a safe asset. Se elige el de mayor momentum.
+
+# §3.8 — Trading de pares.
+pairs:
+  formation_months: 12      # ventana de formación / re-test
+  retest_months: 3          # re-test trimestral
+  pvalue_max: 0.05          # umbral de cointegración Engle-Granger
+  zscore_window: 63         # ventana rolling del z-score del spread
+  entry_z: 2.0              # ±2σ para abrir
+  exit_z: 0.0               # cierre al volver a la media
+  stop_z: 3.5               # ±3.5σ stop por divergencia
+  time_stop_days: 60        # stop por tiempo
+  max_pairs: 20             # máximo de pares simultáneos
+  gross_exposure: 1.0       # exposición bruta total repartida entre pares
+
+# §3.9 — Reversión a la media, grupo único (por sector).
+mean_reversion:
+  lookback_days: 5          # d días de retorno relativo
+  rebalance: "W"            # semanal (el plan también backtestea diario)
+  gross_exposure: 1.0       # Σ|D_i| = I
+
+# §4.6 — Seguimiento de tendencia multi-activo.
+trend_following:
+  lookback_months: 6        # retorno acumulado 6m (paper: 6-12)
+  rebalance: "M"
+  abs_ma_days: 200          # precio > MA(200)
+  vol_lookback: 63          # ventana inverse-vol
+  # Filtrados → cash (peso 0; el resto del libro queda en SHY implícito).

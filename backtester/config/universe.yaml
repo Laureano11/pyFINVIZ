@@ -1,0 +1,66 @@
+# Universo de tickers por estrategia.
+# Rango histórico de descarga: definido en data.start / data.end abajo.
+
+data:
+  start: "2000-01-01"
+  end: "2026-06-09"
+  # Activos de referencia siempre descargados (benchmark + refugios).
+  always:
+    - SPY    # benchmark
+    - TLT    # bonos largos (refugio dual momentum)
+    - GLD    # oro (refugio alternativo)
+    - SHY    # T-bills cortos (cash proxy trend following)
+
+# §4.1.2 — Rotación sectorial con doble momentum.
+# 11 SPDR sectoriales. XLRE (2015) y XLC (2018) tienen historia corta: el motor
+# los maneja vía NaN hasta que existen.
+dual_momentum:
+  sectors:
+    - XLK   # tecnología
+    - XLF   # financiero
+    - XLV   # salud
+    - XLE   # energía
+    - XLY   # consumo discrecional
+    - XLP   # consumo básico
+    - XLI   # industrial
+    - XLB   # materiales
+    - XLU   # utilities
+    - XLRE  # real estate (desde 2015)
+    - XLC   # comunicaciones (desde 2018)
+  benchmark: SPY      # filtro de régimen SPY > MA(200)
+  safe_assets:
+    - TLT
+    - GLD
+
+# §4.6 — Seguimiento de tendencia multi-activo.
+# ~10 ETFs de clases de activos distintas.
+trend_following:
+  assets:
+    - SPY   # acciones US
+    - EFA   # acciones desarrollados ex-US
+    - EEM   # acciones emergentes
+    - TLT   # bonos largos US
+    - IEF   # bonos intermedios US
+    - GLD   # oro
+    - DBC   # commodities amplio
+    - VNQ   # real estate
+    - HYG   # high yield
+    - LQD   # investment grade corp
+  cash_proxy: SHY
+
+# §3.1 §3.9 — Cross-sectional momentum y mean reversion.
+# Universo S&P 500 actual (aproximación; survivorship bias documentado en plan §7).
+# Se carga desde sp500.txt (un ticker por línea) para no inflar este YAML.
+cross_sectional:
+  universe_file: "sp500.txt"
+
+# §3.8 — Pares por sector. Se forman dinámicamente buscando cointegración
+# dentro de cada sector. Usamos un subconjunto líquido por sector.
+pairs:
+  sectors:
+    tech: [AAPL, MSFT, NVDA, AVGO, ORCL, CRM, CSCO, ACN, ADBE, TXN, QCOM, AMD, INTC, IBM]
+    financials: [JPM, BAC, WFC, C, GS, MS, BLK, SCHW, AXP, USB, PNC, TFC, COF]
+    energy: [XOM, CVX, COP, EOG, SLB, MPC, PSX, VLO, OXY, WMB, KMI]
+    health: [UNH, JNJ, LLY, ABBV, MRK, PFE, TMO, ABT, DHR, BMY, AMGN, GILD, CVS]
+    staples: [PG, KO, PEP, COST, WMT, MDLZ, CL, MO, PM, KMB, GIS, K]
+    industrials: [CAT, HON, UPS, BA, GE, RTX, UNP, DE, LMT, MMM, EMR, ETN]

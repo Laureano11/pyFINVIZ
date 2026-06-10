@@ -1,0 +1,9 @@
+yfinance
+pandas
+numpy
+statsmodels
+quantstats
+matplotlib
+pyarrow
+pyyaml
+pytest
