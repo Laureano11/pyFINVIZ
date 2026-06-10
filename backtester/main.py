@@ -8,8 +8,13 @@ Uso:
 from __future__ import annotations
 
 import argparse
+import logging
+import warnings
 
 import pandas as pd
+
+warnings.filterwarnings("ignore", message="findfont: Font family.*not found")
+logging.getLogger("matplotlib.font_manager").setLevel(logging.ERROR)
 
 from .analysis.compare import ALL_STRATEGIES, run_all
 from .analysis.metrics import compute_metrics, metrics_table
@@ -110,6 +115,35 @@ def _cmd_sensitivity(args: argparse.Namespace) -> None:
     print(table.to_string(index=False))
 
 
+SURVIVORS = ["momentum_xs", "dual_momentum", "trend_following"]
+
+
+def _cmd_combo(args: argparse.Namespace) -> None:
+    from .analysis.combo import build_combo, mean_pairwise_correlation
+
+    strategies = SURVIVORS if args.survivors else None
+    scope = "sobrevivientes" if args.survivors else "las 5"
+    print(f"\n=== Combo de {scope} ({args.method}) — el 'combo alfa' (§3.20/§6) ===")
+    table, combo_ret, corr = build_combo(
+        strategies, start=args.start, end=args.end, method=args.method
+    )
+    print(table.to_string())
+    if not corr.empty:
+        avg = mean_pairwise_correlation(corr)
+        print(f"\nCorrelación promedio entre estrategias: {avg:.2f}")
+        print("(más baja = más diversificación = el combo gana más sobre sus partes)")
+
+    if not args.no_tearsheet:
+        from .analysis.report import html_tearsheet
+        from .runner import run_strategy
+
+        # benchmark SPY para el tearsheet del combo
+        _r, _m, spy = run_strategy("dual_momentum", start=args.start, end=args.end)
+        p = html_tearsheet(combo_ret, name=f"combo_{args.method}", benchmark=spy)
+        if p:
+            print(f"tearsheet combo: {p}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Backtester de 5 estrategias.")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -137,6 +171,15 @@ def main() -> None:
     p_sens.add_argument("--start", default=None)
     p_sens.add_argument("--end", default=None)
 
+    p_combo = sub.add_parser("combo", help="combinar las 5 en un portafolio (§3.20/§6)")
+    p_combo.add_argument("--method", default="equal_weight",
+                         choices=["risk_parity", "equal_weight"])
+    p_combo.add_argument("--survivors", action="store_true",
+                         help="combinar solo las 3 que superan a SPY (momentum_xs, dual_momentum, trend_following)")
+    p_combo.add_argument("--start", default=None)
+    p_combo.add_argument("--end", default=None)
+    p_combo.add_argument("--no-tearsheet", action="store_true")
+
     args = parser.parse_args()
     if args.command == "list":
         _cmd_list()
@@ -148,6 +191,8 @@ def main() -> None:
         _cmd_walkforward(args)
     elif args.command == "sensitivity":
         _cmd_sensitivity(args)
+    elif args.command == "combo":
+        _cmd_combo(args)
 
 
 if __name__ == "__main__":

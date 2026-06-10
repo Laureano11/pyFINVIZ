@@ -10,3 +10,8 @@ ib_insync
 python-dotenv
 scipy
 statsmodels
+quantstats
+matplotlib
+pyarrow
+pyyaml
+pytest

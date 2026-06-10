@@ -62,5 +62,5 @@ pairs:
     financials: [JPM, BAC, WFC, C, GS, MS, BLK, SCHW, AXP, USB, PNC, TFC, COF]
     energy: [XOM, CVX, COP, EOG, SLB, MPC, PSX, VLO, OXY, WMB, KMI]
     health: [UNH, JNJ, LLY, ABBV, MRK, PFE, TMO, ABT, DHR, BMY, AMGN, GILD, CVS]
-    staples: [PG, KO, PEP, COST, WMT, MDLZ, CL, MO, PM, KMB, GIS, K]
+    staples: [PG, KO, PEP, COST, WMT, MDLZ, CL, MO, PM, KMB, GIS, MKC]
     industrials: [CAT, HON, UPS, BA, GE, RTX, UNP, DE, LMT, MMM, EMR, ETN]

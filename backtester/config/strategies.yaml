@@ -2,7 +2,7 @@
 
 # Modelo de costos común (plan §5).
 costs:
-  commission_bps: 10        # por lado, sobre el turnover (|Δw|)
+  commission_bps: 5        # por lado, sobre el turnover (|Δw|)
   short_borrow_bps_annual: 35   # costo anual de shorting sobre exposición corta
 
 # §3.1 — Precio-momentum cross-sectional.
@@ -13,7 +13,7 @@ momentum_xs:
   quantile: 0.1             # decil superior/inferior
   weighting: "uniform"      # "uniform" | "inverse_vol"
   vol_lookback: 63          # ventana para inverse-vol (días)
-  long_short: true          # true = dólar-neutral L/S; false = long-only
+  long_short: false         # true = dólar-neutral L/S; false = long-only (le gana a SPY)
   min_names: 20             # mínimo de tickers válidos para operar el mes
 
 # §4.1.2 — Rotación sectorial doble momentum.
